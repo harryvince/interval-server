@@ -27,3 +27,4 @@ build-oss.sh
 release
 release.tar.gz
 data
+.DS_Store

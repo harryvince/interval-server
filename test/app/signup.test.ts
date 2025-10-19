@@ -1,6 +1,7 @@
+import { expect } from '@playwright/test'
+import { isEmailEnabled } from '~/server/utils/email'
 import { test } from '../_fixtures'
 import { config, prisma } from '../_setup'
-import { expect } from '@playwright/test'
 import { generateTestEmail } from '../classes/Signup'
 
 test.skip(!!process.env.SDK_VERSION && process.env.SDK_VERSION !== 'main')
@@ -11,14 +12,14 @@ test.beforeAll(async () => {
   await prisma.globalFeatureFlag.upsert({
     create: {
       flag: 'USER_REGISTRATION_ENABLED',
-      enabled: true,
+      enabled: true
     },
     update: {
-      enabled: true,
+      enabled: true
     },
     where: {
-      flag: 'USER_REGISTRATION_ENABLED',
-    },
+      flag: 'USER_REGISTRATION_ENABLED'
+    }
   })
 })
 
@@ -33,13 +34,16 @@ test.describe('Sign up', () => {
     await page.click('button[type="submit"]')
 
     await page.click('[data-pw-nav-control-panel-toggle]')
-    await expect(
-      page.locator('text=Confirm your email to create and deploy live actions')
-    ).toBeVisible()
-
+    if (isEmailEnabled()) {
+      await expect(
+        page.locator(
+          'text=Confirm your email to create and deploy live actions'
+        )
+      ).toBeVisible()
+    }
     const user = await prisma.user.findUnique({
       where: { email },
-      include: { organizations: true },
+      include: { organizations: true }
     })
 
     expect(user?.organizations[0].name).toEqual('Test Org')
@@ -76,7 +80,7 @@ test.describe('Sign up', () => {
 
     const user = await prisma.user.findUnique({
       where: { email },
-      include: { organizations: true },
+      include: { organizations: true }
     })
 
     expect(user?.organizations[0].promoCode).toEqual(config.promoCode)
@@ -87,8 +91,8 @@ test.describe('Sign up', () => {
 
     const org = await prisma.organization.findUnique({
       where: {
-        slug: config.orgSlug,
-      },
+        slug: config.orgSlug
+      }
     })
 
     if (!org) {
@@ -99,15 +103,15 @@ test.describe('Sign up', () => {
       where: {
         organizationId_slug: {
           organizationId: org.id,
-          slug: 'test-group',
-        },
+          slug: 'test-group'
+        }
       },
       update: {},
       create: {
         organizationId: org.id,
         name: 'Test group',
-        slug: 'test-group',
-      },
+        slug: 'test-group'
+      }
     })
 
     const token = await prisma.userOrganizationInvitation.create({
@@ -115,8 +119,8 @@ test.describe('Sign up', () => {
         email,
         organization: { connect: { slug: config.orgSlug } },
         permissions: ['DEVELOPER'],
-        groupIds: [group.id],
-      },
+        groupIds: [group.id]
+      }
     })
 
     await page.goto(`/signup?token=${token.id}`)
@@ -133,10 +137,10 @@ test.describe('Sign up', () => {
         userOrganizationAccess: {
           include: {
             organization: true,
-            groupMemberships: true,
-          },
-        },
-      },
+            groupMemberships: true
+          }
+        }
+      }
     })
 
     expect(user?.userOrganizationAccess[0].organization.slug).toEqual(
@@ -144,7 +148,7 @@ test.describe('Sign up', () => {
     )
     expect(user?.userOrganizationAccess[0].permissions).toContain('DEVELOPER')
     expect(
-      user?.userOrganizationAccess[0].groupMemberships.map(g => g.groupId)
+      user?.userOrganizationAccess[0].groupMemberships.map((g) => g.groupId)
     ).toEqual([group.id])
 
     // This organization doesn't yet have new dashboard enabled
@@ -168,7 +172,7 @@ test.describe('Sign up', () => {
     ).toBeVisible()
 
     const context = await browser.newContext({
-      storageState: undefined,
+      storageState: undefined
     })
 
     const incognitoPage = await context.newPage()
@@ -194,16 +198,20 @@ test.describe('Sign up', () => {
 
   test('requests new email confirmation after expiry', async ({
     page,
-    signup,
+    signup
   }) => {
     await page.goto('/signup')
     const { email } = await signup.fillSignupForm()
     await page.click('button[type="submit"]')
 
     await page.click('[data-pw-nav-control-panel-toggle]')
-    await expect(
-      page.locator('text=Confirm your email to create and deploy live actions')
-    ).toBeVisible()
+    if (isEmailEnabled()) {
+      await expect(
+        page.locator(
+          'text=Confirm your email to create and deploy live actions'
+        )
+      ).toBeVisible()
+    }
 
     const conf = await signup.getConfirmEmailUrl(email)
     await signup.expireEmailConfirmation(conf.id)
@@ -218,8 +226,12 @@ test.describe('Sign up', () => {
 
     await page.waitForURL(/\/dashboard\/[a-z0-9-]*\/develop\/actions/)
     await page.click('[data-pw-nav-control-panel-toggle]')
-    await expect(
-      page.locator('text=Confirm your email to create and deploy live actions')
-    ).not.toBeVisible()
+    if (isEmailEnabled()) {
+      await expect(
+        page.locator(
+          'text=Confirm your email to create and deploy live actions'
+        )
+      ).not.toBeVisible()
+    }
   })
 })

@@ -1,22 +1,22 @@
+import Interval, { Action, ctx, io, Layout, Page } from '@interval/sdk/dist'
+import IntervalClient from '@interval/sdk/dist/classes/IntervalClient'
+import type { EventualMetaItem } from '@interval/sdk/dist/components/displayMetadata'
+import ExperimentalInterval from '@interval/sdk/dist/experimental'
+import fs from 'fs'
 import http from 'http'
 import path from 'path'
-import fs from 'fs'
-import Interval, { ctx, io, Action, Page, Layout } from '@interval/sdk/dist'
-import ExperimentalInterval from '@interval/sdk/dist/experimental'
-import IntervalClient from '@interval/sdk/dist/classes/IntervalClient'
-import { config, ENDPOINT_URL, sleep } from '../../_setup'
-import { generateS3Urls } from '../../utils/uploads'
-import {
-  bigData,
-  denseData,
-  basicData,
-  mockColumns,
-  denseColumns,
-} from '../../data/table'
-import z from 'zod'
 import util from 'util'
+import z from 'zod'
+import { config, ENDPOINT_URL, sleep } from '../../_setup'
 import * as db from '../../data/mockDb'
-import { EventualMetaItem } from '@interval/sdk/dist/components/displayMetadata'
+import {
+  basicData,
+  bigData,
+  denseColumns,
+  denseData,
+  mockColumns
+} from '../../data/table'
+import { generateS3Urls } from '../../utils/uploads'
 
 const writeFile = util.promisify(fs.writeFile)
 const removeFile = util.promisify(fs.unlink)
@@ -29,7 +29,7 @@ const readFile = util.promisify(fs.readFile)
 const intervalConfigPath = path.join(__dirname, '.interval.config.json')
 
 const SCHEMA = z.object({
-  ghostOrgId: z.string(),
+  ghostOrgId: z.string()
 })
 
 export const localConfig = {
@@ -51,7 +51,7 @@ export const localConfig = {
     } catch (e) {
       return null
     }
-  },
+  }
 }
 
 export { Interval }
@@ -62,7 +62,7 @@ export default async function setupHost() {
     logLevel: 'debug',
     endpoint: ENDPOINT_URL,
     routes: {
-      'io.display.heading': async io => {
+      'io.display.heading': async (io) => {
         await io.display.heading('io.display.heading result')
 
         await io.display.heading('Section heading', {
@@ -71,66 +71,66 @@ export default async function setupHost() {
           menuItems: [
             {
               label: 'External link item',
-              url: 'https://interval.com',
+              url: 'https://interval.com'
             },
             {
               label: 'Action link item',
               action: 'context',
               params: {
-                param: true,
-              },
-            },
-          ],
+                param: true
+              }
+            }
+          ]
         })
       },
-      'io.group': async io => {
+      'io.group': async (io) => {
         await io.group([
           io.display.markdown('1. First item'),
-          io.display.markdown('2. Second item'),
+          io.display.markdown('2. Second item')
         ])
 
         await io.group([io.display.markdown('1. First item')], {
           continueButton: {
             label: 'Custom label',
-            theme: 'danger',
-          },
+            theme: 'danger'
+          }
         })
 
         const { text, num } = await io.group({
           text: io.input.text('Text'),
-          num: io.input.number('Number').optional(),
+          num: io.input.number('Number').optional()
         })
 
         return {
           text,
-          num,
+          num
         }
       },
-      'io.display.image': async io => {
+      'io.display.image': async (io) => {
         await io.display.image('Image via URL', {
           url: 'https://media.giphy.com/media/26ybw6AltpBRmyS76/giphy.gif',
           alt: "Man makes like he's going to jump on a skateboard but doesn't",
-          width: 'medium',
+          width: 'medium'
         })
 
         await io.display.image('Image via buffer', {
           buffer: fs.readFileSync('./test/data/fail.gif'),
-          alt: 'Wile E. Coyote pulls a rope to launch a boulder from a catapult but it topples backwards and crushes him',
+          alt: 'Wile E. Coyote pulls a rope to launch a boulder from a catapult but it topples backwards and crushes him'
         })
       },
-      'io.display.video': async io => {
+      'io.display.video': async (io) => {
         await io.display.video('Video via url', {
           url: 'https://upload.wikimedia.org/wikipedia/commons/a/ad/The_Kid_scenes.ogv',
           size: 'large',
-          muted: true,
+          muted: true
         })
         await io.display.video('Video via buffer', {
           loop: true,
           buffer: fs.readFileSync('./test/data/canyon.mp4'),
-          size: 'large',
+          size: 'large'
         })
       },
-      'io.display.object': async io => {
+      'io.display.object': async (io) => {
         await io.group([
           io.display.object("Here's an object", {
             data: {
@@ -139,101 +139,101 @@ export default async function setupHost() {
               number: 15,
               nullValue: null,
               nested: {
-                name: 'Interval',
+                name: 'Interval'
               },
               longList: Array(100)
                 .fill(0)
-                .map((_, i) => `Item ${i}`),
-            },
+                .map((_, i) => `Item ${i}`)
+            }
           }),
-          io.input.boolean('Does nothing'),
+          io.input.boolean('Does nothing')
         ])
       },
-      'io.display.table': async io => {
+      'io.display.table': async (io) => {
         await io.display.table('Basic auto', {
           data: basicData,
-          rowMenuItems: row => [
+          rowMenuItems: (row) => [
             {
               label: `Action item ${row.index}`,
               route: 'links',
               params: {
-                linkTo: 'table-action-link-test',
-              },
+                linkTo: 'table-action-link-test'
+              }
             },
             {
               label: `Disabled item ${row.index}`,
-              disabled: true,
+              disabled: true
             },
             {
               label: `External item ${row.index}`,
-              url: 'https://interval.com',
-            },
-          ],
+              url: 'https://interval.com'
+            }
+          ]
         })
 
         await io.display.table('Dense auto', {
-          data: denseData,
+          data: denseData
         })
       },
-      'io.display.grid': async io => {
+      'io.display.grid': async (io) => {
         await io.display.grid('Basic auto', {
           data: basicData,
-          renderItem: row => ({
+          renderItem: (row) => ({
             label: row.string,
             description: String(row.number),
             menu: [
               {
                 label: `Action item ${row.index}`,
-                route: 'links',
+                route: 'links'
               },
               {
                 label: `Disabled item ${row.index}`,
-                disabled: true,
+                disabled: true
               },
               {
                 label: `External item ${row.index}`,
-                url: 'https://interval.com',
-              },
-            ],
-          }),
+                url: 'https://interval.com'
+              }
+            ]
+          })
         })
       },
-      'io.display.metadata': async io => {
+      'io.display.metadata': async (io) => {
         const data: EventualMetaItem[] = [
           {
             label: 'Is true',
-            value: true,
+            value: true
           },
           {
             label: 'Is false',
-            value: false,
+            value: false
           },
           {
             label: 'Is null',
-            value: null,
+            value: null
           },
           {
             label: 'Is empty string',
-            value: '',
+            value: ''
           },
           {
             label: 'Is long string',
             value:
-              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet quam in lorem',
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet quam in lorem'
           },
           {
             label: 'Is number 15',
-            value: 15,
+            value: 15
           },
           {
             label: 'Is string',
-            value: 'Hello',
+            value: 'Hello'
           },
           {
             label: 'Action link',
             value: 'Click me',
             action: 'helloCurrentUser',
-            params: { message: 'Hello from metadata!' },
+            params: { message: 'Hello from metadata!' }
           },
           {
             label: 'Image',
@@ -241,16 +241,16 @@ export default async function setupHost() {
             image: {
               url: 'https://picsum.photos/200/300',
               width: 'small',
-              height: 'small',
-            },
+              height: 'small'
+            }
           },
           {
             label: 'Is a function',
-            value: () => 'Called it',
+            value: () => 'Called it'
           },
           {
             label: 'Is a promise',
-            value: new Promise(resolve => {
+            value: new Promise((resolve) => {
               sleep(1000)
                 .then(() => {
                   resolve('Done!')
@@ -258,78 +258,78 @@ export default async function setupHost() {
                 .catch(() => {
                   // for linting
                 })
-            }),
+            })
           },
           {
             label: 'Is an async function',
             value: async () => {
               await sleep(1500)
               return 'Did it'
-            },
-          },
+            }
+          }
         ]
 
         await io.display.metadata('Metadata list', {
-          data,
+          data
         })
 
         await io.display.metadata('Metadata grid', {
           layout: 'grid',
-          data,
+          data
         })
 
         await io.display.metadata('Metadata cards', {
           layout: 'card',
-          data,
+          data
         })
       },
-      'io.display.link': async io => {
+      'io.display.link': async (io) => {
         // `action` has been deprecated for `route`; make sure both work
         await io.group([
           io.display.link('Link to action', {
             action: 'helloCurrentUser',
-            params: { message: 'Hello from link!' },
+            params: { message: 'Hello from link!' }
           }),
           io.display.link('Link to route', {
             route: 'helloCurrentUser',
-            params: { message: 'Hello from link!' },
+            params: { message: 'Hello from link!' }
           }),
           io.display.link('Link to external', {
-            url: 'https://interval.com',
-          }),
+            url: 'https://interval.com'
+          })
         ])
       },
-      tableColumns: async io => {
+      tableColumns: async (io) => {
         await io.display.table('Basic columns', {
           data: basicData,
-          columns: mockColumns,
+          columns: mockColumns
         })
 
         await io.display.table('Dense columns', {
           data: denseData,
-          columns: denseColumns,
+          columns: denseColumns
         })
 
         await io.display.table('Dense shorthand columns', {
           data: denseData,
-          columns: ['index', 'firstName', 'lastName', 'email', 'address'],
+          columns: ['index', 'firstName', 'lastName', 'email', 'address']
         })
       },
-      verticalTable: async io => {
+      verticalTable: async (io) => {
         await io.display.table('Vertical auto', {
           data: basicData,
-          orientation: 'vertical',
+          orientation: 'vertical'
         })
 
         await io.display.table('Vertical columns', {
           data: basicData,
           columns: mockColumns,
-          orientation: 'vertical',
+          orientation: 'vertical'
         })
       },
-      bigTable: async io => {
+      bigTable: async (io) => {
         await io.display.table('Large table', {
-          data: bigData,
+          data: bigData
         })
       },
       context: async (_, ctx) => {
@@ -338,105 +338,105 @@ export default async function setupHost() {
           role: ctx.user.role,
           teams: JSON.stringify(ctx.user.teams),
           message: ctx.params.message,
-          environment: ctx.environment,
+          environment: ctx.environment
         }
       },
-      'io.input.text': async io => {
+      'io.input.text': async (io) => {
         const name = await io.input.text('First name', {
           minLength: 5,
-          maxLength: 20,
+          maxLength: 20
         })
         return { name }
       },
-      'io.input.email': async io => {
+      'io.input.email': async (io) => {
         const email = await io.input.email('Email address')
         return { email }
       },
-      'io.input.boolean': async io => {
+      'io.input.boolean': async (io) => {
         const isOptional = await io.input.boolean('Is optional')
         const isTrue = await io.input.boolean('Is true')
         const isFalse = await io.input.boolean('Is false', {
-          defaultValue: true,
+          defaultValue: true
         })
         return { isTrue, isFalse, isOptional }
       },
-      'io.input.number': async io => {
+      'io.input.number': async (io) => {
         const num1 = await io.input.number('Enter a number')
 
         const num2 = await io.input.number(
           `Enter a second number that's greater than ${num1}`,
           {
-            min: num1 + 1,
+            min: num1 + 1
           }
         )
 
         return { num1, num2, sum: num1 + num2 }
       },
-      'io.input.slider': async io => {
+      'io.input.slider': async (io) => {
         const num1 = await io.input.slider('Enter a number between 1-100', {
           min: 1,
-          max: 100,
+          max: 100
         })
 
         const decimal = await io.input.slider(`Select a decimal value`, {
           min: num1,
           max: num1 + 1,
-          step: 0.1,
+          step: 0.1
         })
 
         return { num1, decimal, sum: num1 + decimal }
       },
-      'io.input.url': async io => {
+      'io.input.url': async (io) => {
         const url = await io.input.url('Enter a URL')
         const secureUrl = await io.input.url('Enter a secure URL', {
-          allowedProtocols: ['https'],
+          allowedProtocols: ['https']
         })
         return { secureUrl: secureUrl.href, url: url.href }
       },
-      currency: async io => {
+      currency: async (io) => {
         const [usd, eur, jpy] = await io.group([
           io.input.number('United States Dollar', {
             min: 10,
-            currency: 'USD',
+            currency: 'USD'
           }),
           io.input.number('Euro', {
-            currency: 'EUR',
+            currency: 'EUR'
           }),
           io.input.number('Japanese yen', {
             currency: 'JPY',
-            decimals: 3,
-          }),
+            decimals: 3
+          })
         ])
 
         return { usd, eur, jpy }
       },
-      confirm: async io => {
+      confirm: async (io) => {
         const first = await io.confirm('Are you sure?', {
-          helpText: 'Really sure?',
+          helpText: 'Really sure?'
         })
         const second = await io.confirm('Still?')
 
         return {
           first,
-          second,
+          second
         }
       },
-      confirmIdentity: async io => {
+      confirmIdentity: async (io) => {
         const first = await io.confirmIdentity('First', {
-          gracePeriodMs: 0,
+          gracePeriodMs: 0
         })
         const second = await io.confirmIdentity('Second')
         const third = await io.confirmIdentity('Third', {
-          gracePeriodMs: 0,
+          gracePeriodMs: 0
         })
 
         return {
           first,
           second,
-          third,
+          third
         }
       },
-      'io.input.richText': async io => {
+      'io.input.richText': async (io) => {
         const body = await io.input.richText('Email body')
 
         await io.display.markdown(`
@@ -447,43 +447,45 @@ export default async function setupHost() {
             ~~~
         `)
       },
-      html: async io => {
+      html: async (io) => {
         const html = await io.input.text('Email body (HTML)', {
-          multiline: true,
+          multiline: true
         })
 
         await io.display.html('You entered', {
-          html,
+          html
         })
       },
-      'io.select.multiple': async io => {
+      'io.select.multiple': async (io) => {
         const options = [
           {
             value: new Date(2022, 6, 20),
             label: new Date(2022, 6, 20),
-            extraData: true,
+            extraData: true
           },
           {
             value: true,
-            label: true,
+            label: true
           },
           {
             value: 3,
-            label: 3,
-          },
+            label: 3
+          }
         ]
 
         const basicSelected = await io.select.multiple('Select zero or more', {
-          options: options.map(o => o.value),
+          options: options.map((o) => o.value)
         })
 
         const selected = await io.select.multiple(
           'Optionally modify the selection, selecting between 1 and 2',
           {
             options,
-            defaultValue: options.filter(o => basicSelected.includes(o.value)),
+            defaultValue: options.filter((o) =>
+              basicSelected.includes(o.value)
+            ),
             minSelections: 1,
-            maxSelections: 2,
+            maxSelections: 2
           }
         )
 
@@ -491,16 +493,16 @@ export default async function setupHost() {
 
         for (const option of options) {
           ret[option.label.toString()] = selected.some(
-            o => o.value === option.value
+            (o) => o.value === option.value
           )
         }
 
         return {
           ...ret,
-          extraData: selected[0].extraData,
+          extraData: selected[0].extraData
         }
       },
-      'io.select.table': async io => {
+      'io.select.table': async (io) => {
         const data = [
           { firstName: 'Alex', lastName: 'Arena' },
           { firstName: 'Dan', lastName: 'Philibin' },
@@ -508,14 +510,14 @@ export default async function setupHost() {
           {
             firstName: 'Jacob',
             lastName: 'Mischka',
-            favoriteColor: 'Orange',
-          },
+            favoriteColor: 'Orange'
+          }
         ]
 
         let selected = await io.select.table('Select some rows', {
           data,
           minSelections: 1,
-          maxSelections: 2,
+          maxSelections: 2
         })
 
         await io.display.markdown(`
@@ -529,73 +531,75 @@ export default async function setupHost() {
         selected = await io.select.table('Select some more', {
           data,
           columns: [
-            { label: 'First name', renderCell: row => row.firstName },
-            { label: 'Last name', renderCell: row => row.lastName },
+            { label: 'First name', renderCell: (row) => row.firstName },
+            { label: 'Last name', renderCell: (row) => row.lastName }
           ],
           minSelections: 1,
           maxSelections: 1,
-          initiallySelected: row =>
-            selected.some(selectedRow => selectedRow.lastName === row.lastName),
+          initiallySelected: (row) =>
+            selected.some(
+              (selectedRow) => selectedRow.lastName === row.lastName
+            )
         })
 
         return selected[0]
       },
-      'io.select.single': async io => {
+      'io.select.single': async (io) => {
         const basic = await io.select.single('Choose basic', {
-          options: [1, true, new Date(2022, 6, 20)],
+          options: [1, true, new Date(2022, 6, 20)]
         })
 
         const selected = await io.select.single('Choose custom', {
           options: [
             { label: 'Admin', value: 'a' },
             { label: 'Editor', value: 2, extraData: true },
-            { label: 'Viewer', value: 'c' },
-          ],
+            { label: 'Viewer', value: 'c' }
+          ]
         })
 
         return {
           basic,
-          ...selected,
+          ...selected
         }
       },
-      select_invalid_defaults: async io => {
+      select_invalid_defaults: async (io) => {
         await io.group([
           io.select.single('Choose one', {
             options: [],
-            defaultValue: { label: 'Invalid', value: 'invalid' },
+            defaultValue: { label: 'Invalid', value: 'invalid' }
           }),
           io.select.multiple('Choose some', {
             options: [],
             defaultValue: [
               { label: 'Invalid', value: 'invalid' },
-              { label: 'Also invalid', value: 'also_invalid' },
-            ],
-          }),
+              { label: 'Also invalid', value: 'also_invalid' }
+            ]
+          })
         ])
       },
-      search: async io => {
+      search: async (io) => {
         const options = [
           { label: true, value: true, extraData: 1 },
           {
             label: new Date(2022, 6, 20),
             value: new Date(2022, 6, 20),
-            extraData: 2,
+            extraData: 2
           },
-          { label: 'Viewer', value: 'c', extraData: 3 },
+          { label: 'Viewer', value: 'c', extraData: 3 }
         ]
 
         const selected = await io.search('Find something', {
           initialResults: options,
-          renderResult: option => option,
+          renderResult: (option) => option,
           async onSearch(query) {
             const re = new RegExp(query, 'i')
-            return options.filter(o => re.test(String(o.label)))
-          },
+            return options.filter((o) => re.test(String(o.label)))
+          }
         })
 
         return selected
       },
-      multi_search: async io => {
+      multi_search: async (io) => {
         const renderUser = (user: db.User) =>
           `${user.firstName} ${user.lastName} (${user.email})`
         const selected = await io
@@ -603,7 +607,7 @@ export default async function setupHost() {
             renderResult: renderUser,
             async onSearch(query) {
               return db.findUser(query)
-            },
+            }
           })
           .multiple()
 
@@ -613,7 +617,7 @@ export default async function setupHost() {
           selected.map((user, i) => [i, renderUser(user)])
         )
       },
-      optional_multi_search: async io => {
+      optional_multi_search: async (io) => {
         const renderUser = (user: db.User) =>
           `${user.firstName} ${user.lastName} (${user.email})`
         const selected = await io
@@ -621,7 +625,7 @@ export default async function setupHost() {
             renderResult: renderUser,
             async onSearch(query) {
               return db.findUser(query)
-            },
+            }
           })
           .multiple()
           .optional()
@@ -634,34 +638,34 @@ export default async function setupHost() {
           selected.map((user, i) => [i, renderUser(user)])
         )
       },
-      two_searches: async io => {
+      two_searches: async (io) => {
         const options = [
           { label: true, value: true, extraData: 1 },
           {
             label: new Date(2022, 6, 20),
             value: new Date(2022, 6, 20),
-            extraData: 2,
+            extraData: 2
           },
-          { label: 'Viewer', value: 'c', extraData: 3 },
+          { label: 'Viewer', value: 'c', extraData: 3 }
         ]
 
         const [r1, r2] = await io.group([
           io.search('First', {
-            renderResult: option => option,
+            renderResult: (option) => option,
             async onSearch(query) {
-              return options.filter(o =>
+              return options.filter((o) =>
                 o.label.toString().toLowerCase().includes(query)
               )
-            },
+            }
           }),
           io.search('Second', {
-            renderResult: option => option,
+            renderResult: (option) => option,
             async onSearch(query) {
-              return options.filter(o =>
+              return options.filter((o) =>
                 o.label.toString().toLowerCase().includes(query)
               )
-            },
-          }),
+            }
+          })
         ])
 
         return {
@@ -670,34 +674,34 @@ export default async function setupHost() {
           equal: r1 === r2,
           r1Index: options.indexOf(r1),
           r2Index: options.indexOf(r2),
-          equalIndex: options.indexOf(r1) === options.indexOf(r2),
+          equalIndex: options.indexOf(r1) === options.indexOf(r2)
         }
       },
-      date: async io => {
+      date: async (io) => {
         const date = await io.input.date('Enter date', {
           min: new Date(2000, 0, 1),
           max: {
             year: 2022,
             month: 12,
-            day: 30,
-          },
+            day: 30
+          }
         })
         return date
       },
-      time: async io => {
+      time: async (io) => {
         const time = await io.input.time('Enter time', {
           min: {
             hour: 8,
-            minute: 30,
+            minute: 30
           },
           max: {
             hour: 20,
-            minute: 0,
-          },
+            minute: 0
+          }
         })
         return time
       },
-      datetime: async io => {
+      datetime: async (io) => {
         const datetime = await io.input.datetime('Enter datetime', {
           min: new Date(2000, 0, 1, 7, 30),
           max: {
@@ -705,25 +709,25 @@ export default async function setupHost() {
             month: 12,
             day: 30,
             hour: 13,
-            minute: 0,
-          },
+            minute: 0
+          }
         })
         return datetime
       },
-      datetime_default: async io => {
+      datetime_default: async (io) => {
         const datetime = await io.input.datetime('Enter datetime', {
-          defaultValue: new Date(2020, 5, 23, 13, 25),
+          defaultValue: new Date(2020, 5, 23, 13, 25)
         })
         return datetime
       },
-      spreadsheet: async io => {
+      spreadsheet: async (io) => {
         const sheet = await io.experimental.spreadsheet('Enter records', {
           columns: {
             string: 'string',
             optionalString: 'string?',
             number: 'number',
-            boolean: 'boolean',
-          },
+            boolean: 'boolean'
+          }
         })
 
         return sheet[0]
@@ -735,15 +739,15 @@ export default async function setupHost() {
 
         await sleep(500)
       },
-      error: async io => {
+      error: async (io) => {
         await io.input.text('First name')
         throw new Error('Unauthorized')
       },
-      'auto-reconnect': async io => {
+      'auto-reconnect': async (io) => {
         await io.input.text('First name')
         await io.input.text('Last name')
       },
-      optional: async io => {
+      optional: async (io) => {
         await io.input.text('Text').optional()
         await io.input.email('Email').optional()
         await io.input.number('Number').optional()
@@ -754,12 +758,12 @@ export default async function setupHost() {
 
         await io.select
           .single('Select single', {
-            options: [],
+            options: []
           })
           .optional()
         await io.select
           .single('Select multiple', {
-            options: [],
+            options: []
           })
           .optional()
         await io
@@ -767,7 +771,7 @@ export default async function setupHost() {
             async onSearch() {
               return []
             },
-            renderResult: () => '',
+            renderResult: () => ''
           })
           .optional()
 
@@ -778,19 +782,19 @@ export default async function setupHost() {
             data: [
               { a: 1, b: 2, c: 3 },
               { a: 4, b: 5, c: 6 },
-              { a: 7, b: 8, c: 9 },
+              { a: 7, b: 8, c: 9 }
             ],
             minSelections: 1,
-            maxSelections: 1,
+            maxSelections: 1
           })
           .optional()
 
         await io.display.object('Date', {
-          data: date,
+          data: date
         })
 
         await io.display.object('Datetime', {
-          data: datetime,
+          data: datetime
         })
 
         return table?.[0]
@@ -803,7 +807,7 @@ export default async function setupHost() {
         await sleep(1000)
 
         await ctx.loading.update({
-          description: 'Description text',
+          description: 'Description text'
         })
 
         await sleep(1000)
@@ -813,7 +817,7 @@ export default async function setupHost() {
         await sleep(1000)
 
         await ctx.loading.start({
-          description: 'Description only',
+          description: 'Description only'
         })
 
         await sleep(1000)
@@ -822,7 +826,7 @@ export default async function setupHost() {
           .then(() => {
             return ctx.loading.start('Loading something in the background')
           })
-          .catch(err => {
+          .catch((err) => {
             // This catch is only here to appease linter, cannot throw.
             console.error('Error sending loading')
           })
@@ -835,7 +839,7 @@ export default async function setupHost() {
 
         await ctx.loading.update({
           label: 'With progress',
-          itemsInQueue,
+          itemsInQueue
         })
 
         await sleep(1000)
@@ -851,17 +855,17 @@ export default async function setupHost() {
         await ctx.notify({
           title: 'Explicit',
           message: 'Message',
-          delivery: [{ to: 'alex@interval.com', method: 'EMAIL' }],
+          delivery: [{ to: 'alex@interval.com', method: 'EMAIL' }]
         })
 
         await io.confirm('Send another?')
 
         await ctx.notify({
           message: 'Implicit',
-          delivery: [{ to: 'test-runner@interval.com' }],
+          delivery: [{ to: 'test-runner@interval.com' }]
         })
       },
-      links: async io => {
+      links: async (io) => {
         let { linkTo } = ctx.params as { linkTo?: string }
 
         if (linkTo) {
@@ -873,31 +877,32 @@ export default async function setupHost() {
               {
                 label: 'This action (relative)',
                 action: 'links',
-                params: { linkTo },
-              },
+                params: { linkTo }
+              }
             ],
             columns: [
               {
                 label: 'Link',
-                renderCell: row => row,
-              },
-            ],
+                renderCell: (row) => row
+              }
+            ]
           })
         } else {
           linkTo = await io.input.text('Enter a URL')
 
+          await io.display.link('Link to', { route: linkTo })
           await io.display.link('Start this action over', {
             route: 'links',
             params: {
-              linkTo,
-            },
+              linkTo
+            }
           })
         }
       },
       uploads: new Page({
         name: 'Uploads',
         routes: {
-          upload: async io => {
+          upload: async (io) => {
             const file = await io.input.file('Upload a file').optional()
 
             if (!file) {
@@ -910,23 +915,23 @@ export default async function setupHost() {
               ...rest,
               url: await url(),
               text: rest.type.includes('text/')
-                ? await text().catch(err => `Invalid text: ${err}`)
+                ? await text().catch((err) => `Invalid text: ${err}`)
                 : undefined,
               json: rest.type.includes('text/')
                 ? await json()
-                    .then(obj => JSON.stringify(obj))
-                    .catch(err => `Invalid JSON: ${err}`)
-                : undefined,
+                    .then((obj) => JSON.stringify(obj))
+                    .catch((err) => `Invalid JSON: ${err}`)
+                : undefined
             }
           },
-          upload_custom_endpoint: async io => {
+          upload_custom_endpoint: async (io) => {
             const file = await io.input.file('Upload a file', {
               generatePresignedUrls: async ({ name }) => {
                 const urlSafeName = name.replace(/ /g, '-')
                 const path = `test-runner/${new Date().getTime()}-${urlSafeName}`
 
                 return generateS3Urls(path)
-              },
+              }
             })
             const { text, json, buffer, url, ...rest } = file
 
@@ -934,44 +939,46 @@ export default async function setupHost() {
               ...rest,
               url: await url(),
               text: rest.type.includes('text/')
-                ? await text().catch(err => `Invalid text: ${err}`)
+                ? await text().catch((err) => `Invalid text: ${err}`)
                 : undefined,
               json: rest.type.includes('text/')
                 ? await json()
-                    .then(obj => JSON.stringify(obj))
-                    .catch(err => `Invalid JSON: ${err}`)
-                : undefined,
+                    .then((obj) => JSON.stringify(obj))
+                    .catch((err) => `Invalid JSON: ${err}`)
+                : undefined
             }
           },
-          multiple: async io => {
+          multiple: async (io) => {
             const files = await io.input.file('Upload some files').multiple()
 
-            return Object.fromEntries(files.map(file => [file.name, file.size]))
-          },
-        },
+            return Object.fromEntries(
+              files.map((file) => [file.name, file.size])
+            )
+          }
+        }
       }),
-      advanced_data: async io => {
+      advanced_data: async (io) => {
         const data = {
           bigInt: BigInt(5),
           map: new Map([
             ['key 1', 1],
-            ['key 2', 2],
+            ['key 2', 2]
           ]),
-          set: new Set(['a', 'b', 'c']),
+          set: new Set(['a', 'b', 'c'])
         }
 
         await io.display.object('Object', {
-          data,
+          data
         })
 
         return data.bigInt
       },
-      malformed: async io => {
+      malformed: async (io) => {
         // @ts-expect-error: Ensuring we can handle invalid calls
         await io.input.text(new Error(), {
           this: BigInt(12),
           // @ts-expect-error: Ensuring we can handle invalid calls
-          something: this.something,
+          something: this.something
         })
       },
       badMessage: async () => {
@@ -983,88 +990,88 @@ export default async function setupHost() {
         // @ts-expect-error: Intentionally using protected method
         await client.__dangerousInternalSend('NONEXISTANT', {
           gibberish: '1234',
-          error: new Error(),
+          error: new Error()
         })
       },
       tables: new Page({
         name: 'Tables',
         routes: {
-          empty: async io => {
+          empty: async (io) => {
             await io.display.table('Table', {
               data: [],
-              columns: ['name', 'email'],
+              columns: ['name', 'email']
             })
             await io.select.table('Table', {
               data: [],
-              columns: ['name', 'email'],
+              columns: ['name', 'email']
             })
           },
-          less_than_page_size: async io => {
+          less_than_page_size: async (io) => {
             await io.display.table('Table', {
               data: basicData.slice(0, 5),
-              defaultPageSize: 50,
+              defaultPageSize: 50
             })
             await io.select.table('Table', {
               data: basicData.slice(0, 5),
-              defaultPageSize: 50,
+              defaultPageSize: 50
             })
           },
-          equal_to_page_size: async io => {
+          equal_to_page_size: async (io) => {
             await io.display.table('Table', {
               data: basicData.slice(0, 5),
-              defaultPageSize: 5,
+              defaultPageSize: 5
             })
             await io.select.table('Table', {
               data: basicData.slice(0, 5),
-              defaultPageSize: 5,
+              defaultPageSize: 5
             })
           },
-          greater_than_page_size: async io => {
+          greater_than_page_size: async (io) => {
             await io.display.table('Table', {
               data: basicData.slice(0, 10),
-              defaultPageSize: 5,
+              defaultPageSize: 5
             })
             await io.select.table('Table', {
               data: basicData.slice(0, 10),
-              defaultPageSize: 5,
+              defaultPageSize: 5
             })
           },
-          auto_columns: async io => {
+          auto_columns: async (io) => {
             await io.display.table('Table', {
               data: basicData,
-              defaultPageSize: 5,
+              defaultPageSize: 5
             })
             await io.select.table('Table', {
               data: basicData,
-              defaultPageSize: 5,
+              defaultPageSize: 5
             })
           },
-          specific_columns: async io => {
+          specific_columns: async (io) => {
             await io.display.table('Table', {
               data: basicData.slice(0, 10),
               columns: ['number', 'string'],
-              defaultPageSize: 5,
+              defaultPageSize: 5
             })
             await io.select.table('Table', {
               data: basicData.slice(0, 10),
               columns: ['number', 'string'],
-              defaultPageSize: 5,
+              defaultPageSize: 5
             })
           },
-          async_get_data: async io => {
+          async_get_data: async (io) => {
             await io.display.table<(typeof bigData)[0]>('Table', {
               getData: async ({
                 queryTerm,
                 sortColumn,
                 sortDirection,
                 offset,
-                pageSize,
+                pageSize
               }) => {
                 let filteredData = bigData.slice()
 
                 if (queryTerm) {
                   const re = new RegExp(queryTerm, 'gi')
-                  filteredData = filteredData.filter(row =>
+                  filteredData = filteredData.filter((row) =>
                     re.test(JSON.stringify(row))
                   )
                 }
@@ -1098,13 +1105,13 @@ export default async function setupHost() {
                 return {
                   data: filteredData.slice(offset, offset + pageSize),
 
-                  totalRecords: bigData.length,
+                  totalRecords: bigData.length
                 }
               },
-              defaultPageSize: 20,
+              defaultPageSize: 20
             })
-          },
-        },
+          }
+        }
       }),
       users: new Page({
         name: 'Users',
@@ -1116,12 +1123,12 @@ export default async function setupHost() {
             menuItems: [
               {
                 label: 'View funnel',
-                route: 'users/view_funnel',
+                route: 'users/view_funnel'
               },
               {
                 label: 'Create user',
-                route: 'users/create',
-              },
+                route: 'users/create'
+              }
             ],
             children: [
               io.display.metadata('', {
@@ -1130,32 +1137,32 @@ export default async function setupHost() {
                   {
                     label: 'New today',
                     value: allUsers.filter(
-                      u =>
+                      (u) =>
                         u.createdAt.getTime() >
                         Date.now() - 1000 * (60 * 60 * 24)
-                    ).length,
+                    ).length
                   },
                   {
                     label: 'New this week',
                     value: allUsers.filter(
-                      u =>
+                      (u) =>
                         u.createdAt.getTime() >
                         Date.now() - 1000 * (60 * 60 * 24 * 7)
-                    ).length,
-                  },
-                ],
+                    ).length
+                  }
+                ]
               }),
               io.display.table('Users', {
                 data: allUsers,
-                rowMenuItems: row => [
+                rowMenuItems: (row) => [
                   {
                     label: 'Edit',
                     route: 'users/edit',
-                    params: { id: row.id },
-                  },
-                ],
-              }),
-            ],
+                    params: { id: row.id }
+                  }
+                ]
+              })
+            ]
           })
         },
         routes: {
@@ -1165,13 +1172,13 @@ export default async function setupHost() {
               const [firstName, lastName, email] = await io.group([
                 io.input.text('First name'),
                 io.input.text('Last name'),
-                io.input.email('Email'),
+                io.input.email('Email')
               ])
 
               await sleep(1000)
 
               return { firstName, lastName, email }
-            },
+            }
           },
           edit: {
             name: 'Edit user',
@@ -1187,26 +1194,26 @@ export default async function setupHost() {
                 io.input.text('ID', { defaultValue: user.id, disabled: true }),
                 io.input.text('First name', { defaultValue: user.firstName }),
                 io.input.text('Last name', { defaultValue: user.lastName }),
-                io.input.email('Email', { defaultValue: user.email }),
+                io.input.email('Email', { defaultValue: user.email })
               ])
 
               await sleep(1000)
 
               return { firstName, lastName, email }
-            },
+            }
           },
           view_funnel: {
             name: 'View funnel',
             handler: async () => {
               await io.display.markdown('# 🌪️')
-            },
-          },
-        },
+            }
+          }
+        }
       }),
       redirect: new Page({
         name: 'Redirects',
         routes: {
-          redirect_url: async io => {
+          redirect_url: async (io) => {
             const url = (await io.input.url('Enter a URL')).toString()
             await ctx.redirect({ url })
             return { url }
@@ -1217,37 +1224,37 @@ export default async function setupHost() {
               await ctx.redirect({
                 route: 'context',
                 params: { message: 'From a page!' },
-                replace: true,
+                replace: true
               })
 
               return new Layout({})
-            },
+            }
           }),
-          redirect_action: async io => {
+          redirect_action: async (io) => {
             const [route, paramsStr] = await io.group([
               io.input.text('Action slug'),
               io.input
                 .text('Params', {
-                  multiline: true,
+                  multiline: true
                 })
-                .optional(),
+                .optional()
             ])
 
             const params = paramsStr ? JSON.parse(paramsStr) : undefined
 
             await ctx.redirect({
               route,
-              params,
+              params
             })
           },
-          redirect_replace: async io => {
+          redirect_replace: async (io) => {
             await ctx.redirect({
               route: 'context',
               params: { message: 'Press back, I dare you' },
-              replace: true,
+              replace: true
             })
-          },
-        },
+          }
+        }
       }),
       unlisted_page: new Page({
         name: 'Unlisted page',
@@ -1264,26 +1271,26 @@ export default async function setupHost() {
             name: 'Listed subpage',
             handler: async () => {
               return new Layout({
-                children: [io.display.markdown('Hello, world!')],
+                children: [io.display.markdown('Hello, world!')]
               })
-            },
+            }
           }),
           unlisted_subpage: new Page({
             name: 'Unlisted subpage',
             unlisted: true,
             handler: async () => {
               return new Layout({
-                children: [io.display.markdown('Hello, world!')],
+                children: [io.display.markdown('Hello, world!')]
               })
-            },
-          }),
-        },
+            }
+          })
+        }
       }),
       unlisted_action: {
         unlisted: true,
         handler: async () => {
           return 'Hello, world!'
-        },
+        }
       },
       with_choices: new Page({
         name: 'With choices',
@@ -1294,7 +1301,7 @@ export default async function setupHost() {
               .withChoices(['OK'])
 
             return {
-              choice,
+              choice
             }
           }),
           on_input: new Action(async () => {
@@ -1304,9 +1311,9 @@ export default async function setupHost() {
                 {
                   label: 'Make it negative',
                   theme: 'danger',
-                  value: 'negative',
+                  value: 'negative'
                 },
-                'Do nothing',
+                'Do nothing'
               ])
               .optional()
 
@@ -1316,7 +1323,7 @@ export default async function setupHost() {
 
             return {
               choice,
-              returnValue: returnValue ?? 'Nothing',
+              returnValue: returnValue ?? 'Nothing'
             }
           }),
           with_multiple: new Action(async () => {
@@ -1328,67 +1335,67 @@ export default async function setupHost() {
                 renderResult: renderUser,
                 async onSearch(query) {
                   return db.findUser(query)
-                },
+                }
               })
               .multiple()
               .withChoices([
                 {
                   label: 'Delete them',
                   theme: 'danger',
-                  value: 'delete',
+                  value: 'delete'
                 },
-                'Do nothing',
+                'Do nothing'
               ])
 
             return {
               choice,
-              returnValue: returnValue.map(renderUser).join(', '),
+              returnValue: returnValue.map(renderUser).join(', ')
             }
           }),
           on_group: new Action(async () => {
             const {
               choice,
-              returnValue: [returnValue],
+              returnValue: [returnValue]
             } = await io.group([io.input.text('Important data')]).withChoices([
               {
                 label: 'Delete the data',
                 value: 'delete',
-                theme: 'danger',
+                theme: 'danger'
               },
               {
                 label: 'Cancel',
                 value: 'cancel',
-                theme: 'secondary',
-              },
+                theme: 'secondary'
+              }
             ])
 
             return {
               choice,
-              returnValue,
+              returnValue
             }
           }),
           on_group_keyed: new Action(async () => {
             const {
               choice,
-              returnValue: { data: returnValue },
+              returnValue: { data: returnValue }
             } = await io
               .group({ data: io.input.text('Important data') })
               .withChoices([
                 {
                   label: 'Delete the data',
                   value: 'delete',
-                  theme: 'danger',
+                  theme: 'danger'
                 },
                 {
                   label: 'Cancel',
                   value: 'cancel',
-                  theme: 'secondary',
-                },
+                  theme: 'secondary'
+                }
               ])
 
             return {
               choice,
-              returnValue,
+              returnValue
             }
           }),
           with_group_validation: new Action(async () => {
@@ -1414,10 +1421,10 @@ export default async function setupHost() {
               })
 
             return { choice, returnValue }
-          }),
-        },
-      }),
-    },
+          })
+        }
+      })
+    }
   })
 
   interval.routes.add(
@@ -1425,16 +1432,16 @@ export default async function setupHost() {
     new Page({
       name: 'Validation',
       routes: {
-        works: async io => {
+        works: async (io) => {
           const [name, email, age, includeDrinkTickets] = await io
             .group([
               io.input.text('Name'),
-              io.input.email('Email').validate(email => {
+              io.input.email('Email').validate((email) => {
                 if (!email.endsWith('@interval.com'))
                   return 'Only Interval employees are invited to the holiday party.'
               }),
               io.input.number('Age').optional(),
-              io.input.boolean('Include drink tickets?'),
+              io.input.boolean('Include drink tickets?')
             ])
             .validate(async ([, , age, includeDrinkTickets]) => {
               await sleep(100)
@@ -1448,19 +1455,19 @@ export default async function setupHost() {
             name,
             email,
             age,
-            includeDrinkTickets,
+            includeDrinkTickets
           }
         },
-        object_works: async io => {
+        object_works: async (io) => {
           const { name, email, age, includeDrinkTickets } = await io
             .group({
               name: io.input.text('Name'),
-              email: io.input.email('Email').validate(email => {
+              email: io.input.email('Email').validate((email) => {
                 if (!email.endsWith('@interval.com'))
                   return 'Only Interval employees are invited to the holiday party.'
               }),
               age: io.input.number('Age').optional(),
-              includeDrinkTickets: io.input.boolean('Include drink tickets?'),
+              includeDrinkTickets: io.input.boolean('Include drink tickets?')
             })
             .validate(async ({ age, includeDrinkTickets }) => {
               await sleep(100)
@@ -1474,16 +1481,16 @@ export default async function setupHost() {
             name,
             email,
             age,
-            includeDrinkTickets,
+            includeDrinkTickets
           }
         },
-        optional: async io => {
+        optional: async (io) => {
           const name = await io.input.text('Name').optional()
 
           const age = await io.input
             .number('Age')
             .optional()
-            .validate(age => {
+            .validate((age) => {
               if (name && !age) {
                 return 'Must specify an age if name is specified.'
               }
@@ -1491,10 +1498,10 @@ export default async function setupHost() {
 
           return {
             name,
-            age,
+            age
           }
         },
-        multiple: async io => {
+        multiple: async (io) => {
           const renderUser = (user: db.User) =>
             `${user.firstName} ${user.lastName} (${user.email})`
 
@@ -1506,10 +1513,10 @@ export default async function setupHost() {
               async onSearch(query) {
                 return db.findUser(query)
               },
-              helpText: `Anyone but ${firstUser.firstName} ${firstUser.lastName}.`,
+              helpText: `Anyone but ${firstUser.firstName} ${firstUser.lastName}.`
             })
             .multiple()
-            .validate(users => {
+            .validate((users) => {
               if (users.includes(firstUser)) {
                 return `${firstUser.firstName} is not allowed.`
               }
@@ -1523,23 +1530,23 @@ export default async function setupHost() {
             selected.map((user, i) => [i, renderUser(user)])
           )
         },
-        checkboxes: async io => {
+        checkboxes: async (io) => {
           const options = ['A', 'B', 'C', 'D']
           const selected = await io.select
             .multiple('Select anything but B', {
-              options,
+              options
             })
-            .validate(selected => {
+            .validate((selected) => {
               if (selected.includes('B')) {
                 return 'Anything but B.'
               }
             })
 
           return Object.fromEntries(
-            options.map(val => [val, selected.includes(val)])
+            options.map((val) => [val, selected.includes(val)])
           )
-        },
-      },
+        }
+      }
     })
   )
 
@@ -1553,8 +1560,8 @@ export default async function setupHost() {
       self_destructing: async () => {
         dynamicGroup.remove('self_destructing')
         return 'Goodbye!'
-      },
-    },
+      }
+    }
   })
 
   interval.routes.add('before_listen', async () => {
@@ -1569,7 +1576,7 @@ export default async function setupHost() {
         return 'Hello, from the future'
       })
     })
-    .catch(err => {
+    .catch((err) => {
       console.error('Failed starting interval listener', err)
     })
 
@@ -1588,16 +1595,16 @@ export default async function setupHost() {
           handler: async () => {
             return new Layout({
               title: 'Inside a page via HTTP',
-              children: [io.display.markdown('Neat!')],
+              children: [io.display.markdown('Neat!')]
             })
           },
           routes: {
             sub_action: async () => {
               return 'Hello, from a sub action!'
-            },
-          },
-        }),
-      },
+            }
+          }
+        })
+      }
     })
     const server = http.createServer(stateless.httpRequestHandler)
     server.listen(config.statelessPort)
