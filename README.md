@@ -1,3 +1,10 @@
+# ⚠️ Warning: This is a forked version of the original Interval Server. It is not maintained by Interval.
+
+I loved using the original Interval Server and when it was made open source my
+drive to use it was even greater. However, I've noticed that the original
+Interval Server doesn't have much activity anymore so I decided to fork it and
+make it work with my own needs.
+
 # Interval Server
 
 Interval Server is the central node used to run applications developed with the [Interval SDK](https://github.com/interval/interval-node).
@@ -93,7 +100,7 @@ The Interval Server Docker image is: `docker.io/alexarena/interval-server:latest
 
 If you're looking for a quick and cheap deployment option, check out the community-made [Railway template](https://railway.com/template/tFqAVW?referralCode=chIZYq) which offers simple one-click deployment.
 
-Also, many services [like Render](https://render.com/docs/deploy-an-image) make it trivial to deploy Docker images with just a few clicks.  
+Also, many services [like Render](https://render.com/docs/deploy-an-image) make it trivial to deploy Docker images with just a few clicks.
 
 Important things to know:
 
