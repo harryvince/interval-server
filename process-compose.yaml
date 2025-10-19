@@ -1,0 +1,13 @@
+processes:
+  docker:
+    command: docker-compose up
+  server:
+    command: bun server:dev
+    depends_on:
+      docker:
+        condition: process_started
+  client:
+    command: bun client:dev
+    depends_on:
+      docker:
+        condition: process_started
