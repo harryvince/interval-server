@@ -1,23 +1,23 @@
-FROM node:18.18.0-alpine AS builder
+FROM oven/bun:1.3.0 AS builder
 
 WORKDIR /app
 
-COPY package.json yarn.lock ./
-
-RUN yarn install --frozen-lockfile
+RUN apt-get update -y && apt-get install -y openssl
 
 COPY . .
+RUN bun install --frozen-lockfile
+RUN bun run build
 
-RUN yarn build
-
-FROM node:18.18.0-alpine AS runner
+FROM oven/bun:1.3.0
 
 WORKDIR /app
+
+RUN apt-get update -y && apt-get install -y openssl
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/email-templates ./email-templates
+COPY --from=builder /app/email-templates ./dist/email-templates
 COPY --from=builder /app/public ./public
 
-CMD [ "node", "dist/src/entry.js", "start" ]
+CMD ["bun", "dist/src/entry.js", "start"]

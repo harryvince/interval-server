@@ -32,7 +32,7 @@
     "client:preview": "vite preview",
     "client:storybook": "storybook dev -p 6006 --ci",
     "client:storybook:build": "storybook build",
-    "server:dev": "tsx --tsconfig tsconfig.server.json --watch src/entry.ts start",
+    "server:dev": "bun --watch src/entry.ts start",
     "server:build": "tsc --project tsconfig.server.json && tsc-alias -p tsconfig.server.json",
     "wss:build": "tsc --project tsconfig.wss.json  && tsc-alias -p tsconfig.wss.json",
     "test": "playwright test",
@@ -66,7 +66,7 @@
     "evt": "^2.4.10",
     "generate-password": "^1.7.0",
     "glob": "^8.0.3",
-    "iron-session": "^6.0.5",
+    "iron-session": "^6.3.1",
     "loglevel": "^1.8.1",
     "luxon": "^3.0.4",
     "node-cron": "^3.0.1",
@@ -197,16 +197,17 @@
     "ts-node": "^10.9.1",
     "tsc-alias": "^1.8.8",
     "tsconfig-paths": "^4.1.0",
-    "tsx": "^4.20.6",
     "typescript": "^4.8.4",
     "use-debounce": "^8.0.4",
     "vite": "^3.2.0",
-    "vite-plugin-checker": "^0.6.2",
     "vite-tsconfig-paths": "^4.0.5",
     "xlsx": "^0.18.5"
   },
   "resolutions": {
     "ts-node": "^10.9.1"
   },
-  "private": true
+  "private": true,
+  "patchedDependencies": {
+    "iron-session@6.3.1": "patches/iron-session@6.3.1.patch"
+  }
 }

@@ -1,7 +1,6 @@
-import fetch from 'node-fetch'
-import { HttpHost, Prisma } from '@prisma/client'
-import prisma from '../prisma'
+import type { HttpHost, Prisma } from '@prisma/client'
 import { logger } from '~/server/utils/logger'
+import prisma from '../prisma'
 
 export async function checkHttpHost(httpHost: HttpHost) {
   let success = false
@@ -9,11 +8,11 @@ export async function checkHttpHost(httpHost: HttpHost) {
     const response = await fetch(httpHost.url, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        httpHostId: httpHost.id,
-      }),
+        httpHostId: httpHost.id
+      })
     })
 
     success = response.ok
@@ -23,24 +22,24 @@ export async function checkHttpHost(httpHost: HttpHost) {
         'checkHttpHost received unsuccessful status code for httpHost',
         {
           httpHostId: httpHost.id,
-          responseStatus: response.status,
+          responseStatus: response.status
         }
       )
     }
   } catch (error) {
     logger.error('checkHttpHost failed to reach url for httpHost', {
       httpHostId: httpHost.id,
-      error,
+      error
     })
   }
 
   return await prisma.httpHost.update({
     where: {
-      id: httpHost.id,
+      id: httpHost.id
     },
     data: {
-      status: success ? 'ONLINE' : 'UNREACHABLE',
-    },
+      status: success ? 'ONLINE' : 'UNREACHABLE'
+    }
   })
 }
 
@@ -49,12 +48,12 @@ export async function checkHttpHosts(where?: Prisma.HttpHostWhereInput) {
     const hosts = await prisma.httpHost.findMany({
       where: {
         deletedAt: null,
-        ...where,
-      },
+        ...where
+      }
     })
 
     await Promise.all(
-      hosts.map(async host => {
+      hosts.map(async (host) => {
         await checkHttpHost(host)
         // TODO: Notify users when their actions are unreachable
       })
@@ -66,14 +65,14 @@ export async function checkHttpHosts(where?: Prisma.HttpHostWhereInput) {
 
 export async function checkUnreachableHttpHosts() {
   return await checkHttpHosts({
-    status: 'UNREACHABLE',
+    status: 'UNREACHABLE'
   })
 }
 
 export async function checkNotUnreachableHttpHosts() {
   return await checkHttpHosts({
     status: {
-      not: 'UNREACHABLE',
-    },
+      not: 'UNREACHABLE'
+    }
   })
 }

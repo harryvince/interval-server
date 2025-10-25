@@ -1,8 +1,7 @@
-import prisma from '~/server/prisma'
 import type { Request, Response } from 'express'
-import fetch from 'node-fetch'
 import { URLSearchParams } from 'url'
 import env from '~/env'
+import prisma from '~/server/prisma'
 import { logger } from '~/server/utils/logger'
 
 const SLACK_OAUTH_ACCESS_URL = 'https://slack.com/api/oauth.v2.access'
@@ -25,8 +24,8 @@ export default async function slackOauth(req: Request, res: Response) {
 
   const org = await prisma.organization.findUnique({
     where: {
-      id: req.session.currentOrganizationId,
-    },
+      id: req.session.currentOrganizationId
+    }
   })
 
   if (!req.session.user) {
@@ -41,9 +40,9 @@ export default async function slackOauth(req: Request, res: Response) {
     where: {
       user: { id: req.session.user.id },
       organization: {
-        id: req.session.currentOrganizationId,
-      },
-    },
+        id: req.session.currentOrganizationId
+      }
+    }
   })
 
   if (!access) {
@@ -63,8 +62,8 @@ export default async function slackOauth(req: Request, res: Response) {
         code: code as string,
         redirect_uri: `${env.APP_URL}/api/auth/oauth/slack`,
         client_id: env.SLACK_CLIENT_ID,
-        client_secret: env.SLACK_CLIENT_SECRET,
-      }),
+        client_secret: env.SLACK_CLIENT_SECRET
+      })
     })
 
     const response = await rawResponse.json()
@@ -72,20 +71,20 @@ export default async function slackOauth(req: Request, res: Response) {
     if (response.access_token) {
       await prisma.organization.update({
         where: {
-          id: req.session.currentOrganizationId,
+          id: req.session.currentOrganizationId
         },
         data: {
           private: {
             upsert: {
               create: {
-                slackAccessToken: response.access_token,
+                slackAccessToken: response.access_token
               },
               update: {
-                slackAccessToken: response.access_token,
-              },
-            },
-          },
-        },
+                slackAccessToken: response.access_token
+              }
+            }
+          }
+        }
       })
       oauthResult = 'success'
     } else {

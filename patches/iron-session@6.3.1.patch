@@ -1,0 +1,29 @@
+diff --git a/node_modules/iron-session/.bun-tag-5e8e6e685e655c32 b/.bun-tag-5e8e6e685e655c32
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/dist/index.js b/dist/index.js
+index 70ed0084b269132bc841c5ccf02d341659efc382..7f2e6fb35b706c2929bd5036374f77dd88b9ab6e 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -143,7 +143,7 @@ function createGetIronSession(_crypto2, unsealData2, sealData2) {
+ function addToCookies(cookieValue, res) {
+   var _a;
+   if ("headers" in res) {
+-    res.headers.append("set-cookie", cookieValue);
++    res.append("set-cookie", cookieValue);
+     return;
+   }
+   let existingSetCookie = (_a = res.getHeader("set-cookie")) != null ? _a : [];
+diff --git a/dist/index.mjs b/dist/index.mjs
+index 7dc2aef6974cfe6faedc5e19d8f8eb297f9b7448..705628e918e327b5ac237e98b2d6d9c88414002e 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -106,7 +106,7 @@ function createGetIronSession(_crypto2, unsealData2, sealData2) {
+ function addToCookies(cookieValue, res) {
+   var _a;
+   if ("headers" in res) {
+-    res.headers.append("set-cookie", cookieValue);
++    res.append("set-cookie", cookieValue);
+     return;
+   }
+   let existingSetCookie = (_a = res.getHeader("set-cookie")) != null ? _a : [];
