@@ -1620,7 +1620,7 @@ test.describe('Pages', () => {
     await transactions.run('users/view_funnel')
 
     await expect(page.locator('h2:text("View funnel")')).toBeVisible()
-    await expect(page.locator('text=🌪️')).toBeVisible()
+    await expect(page.locator('text=Funnel Icon')).toBeVisible()
   })
 })
 

@@ -869,7 +869,6 @@ export default async function setupHost() {
         let { linkTo } = ctx.params as { linkTo?: string }
 
         if (linkTo) {
-          console.log(linkTo)
           await io.display.table('Links', {
             data: [
               { label: 'Link to', url: linkTo },
@@ -890,12 +889,10 @@ export default async function setupHost() {
         } else {
           linkTo = await io.input.text('Enter a URL')
 
-          await io.display.link('Link to', { route: linkTo })
+          await io.display.link('Link to', { url: linkTo })
           await io.display.link('Start this action over', {
             route: 'links',
-            params: {
-              linkTo
-            }
+            params: { linkTo }
           })
         }
       },
@@ -1205,7 +1202,7 @@ export default async function setupHost() {
           view_funnel: {
             name: 'View funnel',
             handler: async () => {
-              await io.display.markdown('# 🌪️')
+              await io.display.markdown('# Funnel Icon')
             }
           }
         }
