@@ -1,6 +1,7 @@
 import env from 'env'
 import { createTransport } from 'nodemailer'
 import { ServerClient as PostmarkClient } from 'postmark'
+import { isEmailEnabled } from '~/server/utils/email'
 import { logger } from '~/server/utils/logger'
 
 const postmark =
@@ -30,6 +31,8 @@ export async function sendEmail(input: {
   subject: string
   html: string
 }) {
+  if (!isEmailEnabled()) return { accepted: true }
+
   if (postmark) {
     try {
       const response = await postmark.sendEmail({
