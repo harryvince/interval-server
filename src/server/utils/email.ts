@@ -1,3 +1,6 @@
-import env from "env";
+import env from 'env'
 
-export const isEmailEnabled = () => !!env.POSTMARK_API_KEY && !!env.EMAIL_FROM
+export const isEmailEnabled = () => {
+  if (env.POSTMARK_API_KEY || (env.SMTP_HOST && env.SMTP_PORT)) return true
+  return false
+}

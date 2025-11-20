@@ -1,5 +1,5 @@
-import { z } from 'zod'
 import dotenv from 'dotenv'
+import { z } from 'zod'
 import { logger } from './server/utils/logger'
 
 try {
@@ -21,6 +21,11 @@ const schema = z.object({
 
   // emails
   POSTMARK_API_KEY: z.string().optional(),
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.string().optional(),
+  SMTP_SECURE: z.string().optional(),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
   EMAIL_FROM: z.string().optional().default('Interval <help@interval.com>'),
 
   // authentication
@@ -37,12 +42,12 @@ const schema = z.object({
   S3_KEY_SECRET: z.string().optional(),
   S3_BUCKET: z.string().optional(),
   S3_REGION: z.string().optional(),
-  S3_ENDPOINT: z.string().optional(),
+  S3_ENDPOINT: z.string().optional()
 })
 
 const possiblyValid = schema.safeParse(process.env)
 if (!possiblyValid.success) {
-  const missing = possiblyValid.error.issues.map(i => i.path).flat()
+  const missing = possiblyValid.error.issues.flatMap((i) => i.path)
   logger.error(
     `Missing required environment variables: \n - ${missing.join('\n - ')}`
   )
